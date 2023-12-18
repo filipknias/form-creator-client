@@ -1,21 +1,17 @@
-import { createContext, useState, useContext, ReactNode, useMemo, Dispatch, SetStateAction, useCallback, useEffect } from "react";
-import { FormElement, NewFormElement } from "@/types/FormCreator";
+import { createContext, useState, useContext, ReactNode, useMemo, Dispatch, SetStateAction } from "react";
+import { FormElement, NewFormElement, ActiveElementId } from "@/types/FormCreator";
 import { useFormContext } from "react-hook-form";
-import {nanoid} from 'nanoid';
-
-type ActiveElementId = string|null;
+import { nanoid } from 'nanoid';
 
 interface FormCreatorProviderState {
     formElements: FormElement[];
-    addFormElement: (formElement: NewFormElement) => void;
+    addFormElement: (formElement: NewFormElement, index?: number) => void;
     deleteFormElement: (id: string) => void;
-    moveElementUp: (id: string) => void;
-    moveElementDown: (id: string) => void;
-    moveElements: (id: string, replaceId: string) => void;
     elementsCount: number;
     activeElementId: ActiveElementId;
     setActiveElementId: Dispatch<SetStateAction<ActiveElementId>>;
     activeFormElement: FormElement|null;
+    moveElements: (index: number, id: string) => void;
 }
 
 interface FormCreatorProviderProps {
@@ -26,13 +22,11 @@ const initialState: FormCreatorProviderState = {
     formElements: [],
     addFormElement: () => {},
     deleteFormElement: () => {},
-    moveElementUp: () => {},
-    moveElementDown: () => {},
     elementsCount: 0,
     activeElementId: null,
     setActiveElementId: () => {},
     activeFormElement: null,
-    moveElements: () => {}
+    moveElements: () => {},
 }
 
 const FormCreatorProviderContext = createContext<FormCreatorProviderState>(initialState);
@@ -44,18 +38,17 @@ export function FormCreatorProvider({ children }: FormCreatorProviderProps) {
 
     const elementsCount = formElements.length;
 
-    const sortElementsByIndex = useCallback(() => {
-        return formElements.sort((a, b) => b.indexPosition - a.indexPosition);
-    }, [formElements]);
-
-    useEffect(() => {
-        // const sortedElements = sortElementsByIndex();
-        // setFormElements(sortedElements);
-    }, [formElements]);
-
-    const addFormElement = (formElement: NewFormElement) => {
+    const addFormElement = (formElement: NewFormElement, index?: number) => {
         const id = nanoid();
-        setFormElements((elements) => [...elements, { ...formElement, id }]);
+        setFormElements((elements) => {
+            if (index === undefined) {
+                return [...elements, { ...formElement, id }];
+            }
+
+            const newElements = [...elements];
+            newElements.splice(index, 0, { ...formElement, id });
+            return newElements.map((element, index) => ({ ...element, indexPosition: index }));
+        });
         if (formElement.attributes) {
             Object.entries(formElement.attributes).forEach(([key, value]) => {
                setValue(`${id}.${key}`, value); 
@@ -71,48 +64,14 @@ export function FormCreatorProvider({ children }: FormCreatorProviderProps) {
         unregister(id);
     };
 
-    const moveElements = (id: string, replaceId: string) => {
+    const moveElements = (index: number, id: string) => {
         setFormElements((prevElements) => {
             const newElements = [...prevElements];
-            const oldFormElement = formElements.find((element) => element.id === id);
-            const newFormElement = formElements.find((element) => element.id === replaceId);
-            if (!oldFormElement || !newFormElement) return newElements;
-            // const oldIndex = formElements.indexOf(oldFormElement);
-            const newIndex = formElements.indexOf(newFormElement);
-            newElements.splice(newIndex, 0, oldFormElement);
-            return newElements
-        })
-    }
-
-    const moveElementUp = (id: string) => {
-        const formElement = formElements.find((element) => element.id === id);
-        if (!formElement || formElement.indexPosition === elementsCount - 1) return;
-
-        setFormElements((prevElements) => {
-            return prevElements.map((element, index) => {
-                if (index === formElement.indexPosition - 1) {
-                    return { ...element, indexPosition: element.indexPosition - 1 };
-                } else if (index === formElement.indexPosition) {
-                    return { ...element, indexPosition: element.indexPosition + 1 };
-                }
-                return element;
-            })
-        });
-    };
-
-    const moveElementDown = (id: string) => {
-        const formElement = formElements.find((element) => element.id === id);
-        if (!formElement || formElement.indexPosition === 0) return;
-
-        setFormElements((prevElements) => {
-            return prevElements.map((element, index) => {
-                if (index === formElement.indexPosition + 1) {
-                    return { ...element, indexPosition: element.indexPosition - 1 };    
-                } else if (index === formElement.indexPosition) {
-                    return { ...element, indexPosition: element.indexPosition + 1 };
-                }
-                return element;
-            })
+            const replaceElement = newElements.find((element) => element.id === id);
+            if (!replaceElement) return newElements;
+            const filteredElements = newElements.filter((elements) => elements.id !== id);
+            filteredElements.splice(index, 0, replaceElement);
+            return filteredElements.map((element, index) => ({ ...element, indexPosition: index }));
         });
     };
 
@@ -128,12 +87,10 @@ export function FormCreatorProvider({ children }: FormCreatorProviderProps) {
         addFormElement,
         elementsCount,
         deleteFormElement,
-        moveElementDown,
-        moveElementUp,
         activeElementId,
         setActiveElementId,
         activeFormElement,
-        moveElements
+        moveElements,
     };
     
     return (

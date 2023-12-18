@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import CreateForm from '@/pages/CreateForm.tsx';
 import { ThemeProvider } from '@/context/ThemeContext.tsx';
+import ReduxProvider from '@/components/providers/ReduxProvider.tsx';
 
 const router = createBrowserRouter([
     {
@@ -23,7 +24,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark">
-        <RouterProvider router={router} />
+        {/* <ReduxProvider> */}
+            <RouterProvider router={router} />
+        {/* </ReduxProvider> */}
     </ThemeProvider>
   </React.StrictMode>,
 )

@@ -2,28 +2,41 @@ import { useFormCreator } from "@/context/FormCreatorContext";
 import { Card } from "../ui/card";
 import ElementComponent from "@/components/app/ElementComponent";
 import ElementComponentOverlay from "@/components/app/ElementComponentOverlay";
-import { useDroppable } from "@dnd-kit/core";
+import { useDndMonitor, useDroppable, DragEndEvent } from "@dnd-kit/core";
 import { Types } from "@/types/DndTypes";
+import { NewFormElement } from "@/types/FormCreator";
+import ElementDraggableWrapper from "@/components/app/ElementDraggableWrapper";
 
 export default function FormCreatorArea() {
-    const { formElements } = useFormCreator();
-    const { setNodeRef, active } = useDroppable({
+    const { formElements, addFormElement } = useFormCreator();
+    const { setNodeRef, isOver } = useDroppable({
         id: Types.CREATOR_AREA,
     });
 
+    useDndMonitor({
+        onDragEnd: (event: DragEndEvent) => {
+            if (!isOver) return;
+            const element = event.active.data.current as NewFormElement;
+            const isElementInState = formElements.find((element) => element.id === event.active.id);
+            if (!isElementInState) {
+                addFormElement(element);
+            }
+        },
+    });
+
     return (
-        <Card className="h-full p-4 overflow-y-auto relative" ref={setNodeRef}>
-            {active && (
-                <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-10">
-                    <h1 className="text-slate-200 text-4xl">Drop element here</h1>
-                </div>
-            )}
+        <Card className="h-full p-4 overflow-y-auto overflow-x-hidden" ref={setNodeRef}>
             <div className="flex flex-col gap-4">
-                {formElements.map(({ id, type }) => (
-                    <ElementComponentOverlay id={id} key={id}>
-                        <ElementComponent type={type} />
-                    </ElementComponentOverlay>
+                {formElements.map((formElement) => (
+                    <ElementDraggableWrapper formElement={formElement} key={formElement.id}>
+                        <ElementComponentOverlay id={formElement.id}>
+                            <ElementComponent type={formElement.type} />
+                        </ElementComponentOverlay>
+                    </ElementDraggableWrapper>
                 ))}
+                {isOver && (
+                    <div className="rounded-xl bg-slate-800 w-full h-36"></div>
+                )}
             </div>
         </Card>
     )

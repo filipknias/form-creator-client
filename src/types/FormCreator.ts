@@ -10,6 +10,8 @@ export type ElementAttributes = Record<string, ElementAttributeValue>;
 
 export type NewFormElement = Omit<FormElement, "id">;
 
+export type ActiveElementId = string|null;
+
 export type FormElement = {
     id: string;
     indexPosition: number;
