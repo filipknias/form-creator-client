@@ -3,6 +3,7 @@ import { useFormCreator } from "@/context/FormCreatorContext";
 import { FaTrash } from "react-icons/fa6";
 import { DragEndEvent, useDndMonitor, useDroppable, useDndContext } from "@dnd-kit/core";
 import { NewFormElement } from "@/types/FormCreator";
+import { Types } from "@/types/DndTypes";
 
 interface Props {
     children: ReactNode;
@@ -22,23 +23,37 @@ export default function ElementComponentOverlay({ children, id }: Props) {
 
     useDndMonitor({
         onDragEnd: (event: DragEndEvent) => {
-            if (event.over?.id !== `${id}-top-half` && event.over?.id !== `${id}-bottom-half`) return;
-
+            const droppableElementId = event.over?.id;
+            const topHalfId = `${id}-top-half`;
+            const bottomHalfId = `${id}-bottom-half`;
             const activeElementId = event.active.id as string;
-            const isElementInState = formElements.find((element) => element.id === activeElementId);
-            const overElement = formElements.find((element) => element.id === id);
-            if (isElementInState && overElement) {
-                return moveElements(overElement.indexPosition, activeElementId);
-            }
-            
+            const draggingElement = formElements.find((element) => element.id === activeElementId);
             const overlayElement = formElements.find((element) => element.id === id);
-            const newElement = event.active.data.current as NewFormElement;
-            if (!overlayElement) return;
-            if (newElement.indexPosition === overlayElement.indexPosition - 1) return;
-            if (topDroppableHalf.isOver) {
-                addFormElement(newElement, overlayElement.indexPosition);
-            } else if (bottomDroppableHalf.isOver) {
-                addFormElement(newElement, overlayElement.indexPosition + 1);
+
+            if (!draggingElement || !overlayElement) return;
+
+            switch (droppableElementId) {
+                case Types.CREATOR_AREA: {
+                    const newElement = event.active.data.current as NewFormElement;
+                    if (topDroppableHalf.isOver) {
+                        addFormElement(newElement, overlayElement.indexPosition);
+                    } else if (bottomDroppableHalf.isOver) {
+                        addFormElement(newElement, overlayElement.indexPosition + 1);
+                    } else {
+                        moveElements(formElements.length, draggingElement.id);
+                    }
+                    break;
+                }
+                case topHalfId: {
+                    if (draggingElement.indexPosition === overlayElement.indexPosition - 1) return;
+                    moveElements(overlayElement.indexPosition, activeElementId);
+                    break;
+                }
+                case bottomHalfId: {
+                    if (draggingElement.indexPosition === overlayElement.indexPosition + 1) return;
+                    moveElements(overlayElement.indexPosition, activeElementId);
+                    break;
+                }
             }
         },
     });
