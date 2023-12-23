@@ -30,10 +30,9 @@ export default function ElementComponentOverlay({ children, id }: Props) {
             const draggingElement = formElements.find((element) => element.id === activeElementId);
             const overlayElement = formElements.find((element) => element.id === id);
 
-            if (!draggingElement || !overlayElement) return;
-
             switch (droppableElementId) {
                 case Types.CREATOR_AREA: {
+                    if (!draggingElement || !overlayElement) return;
                     const newElement = event.active.data.current as NewFormElement;
                     if (topDroppableHalf.isOver) {
                         addFormElement(newElement, overlayElement.indexPosition);
@@ -45,13 +44,23 @@ export default function ElementComponentOverlay({ children, id }: Props) {
                     break;
                 }
                 case topHalfId: {
-                    if (draggingElement.indexPosition === overlayElement.indexPosition - 1) return;
-                    moveElements(overlayElement.indexPosition, activeElementId);
+                    if (!overlayElement) return;
+                    if (draggingElement && draggingElement.indexPosition !== overlayElement.indexPosition - 1) {
+                        moveElements(overlayElement.indexPosition, activeElementId);
+                    } else if (!draggingElement) {
+                        const newElement = event.active.data.current as NewFormElement;
+                        addFormElement(newElement, overlayElement.indexPosition);
+                    }
                     break;
                 }
                 case bottomHalfId: {
-                    if (draggingElement.indexPosition === overlayElement.indexPosition + 1) return;
-                    moveElements(overlayElement.indexPosition, activeElementId);
+                    if (!overlayElement) return;
+                    if (draggingElement && draggingElement.indexPosition !== overlayElement.indexPosition + 1) {
+                        moveElements(overlayElement.indexPosition, activeElementId);
+                    } else if (!draggingElement) {
+                        const newElement = event.active.data.current as NewFormElement;
+                        addFormElement(newElement, overlayElement.indexPosition + 1);
+                    }
                     break;
                 }
             }
@@ -70,10 +79,10 @@ export default function ElementComponentOverlay({ children, id }: Props) {
                     <div className="h-2 bg-white rounded-b-xl"></div>
                 )}
             </div>
-            <div className="absolute inset-0 bg-black bg-opacity-70 hidden group-hover:flex items-center gap-4 justify-end">
+            <div className="absolute inset-0 bg-black bg-opacity-70 hidden group-hover:flex items-center gap-4 justify-end z-50">
                 <button 
                     className="bg-red-500 flex items-center justify-center w-16 h-full text-xl hover:bg-red-600 transition duration-200 rounded-r-md"
-                    onClick={() => deleteFormElement(id)}
+                    onMouseUp={() => deleteFormElement(id)}
                 >
                     <FaTrash />
                 </button>
