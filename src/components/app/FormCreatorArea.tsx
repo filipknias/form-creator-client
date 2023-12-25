@@ -6,12 +6,15 @@ import { useDndMonitor, useDroppable, DragEndEvent } from "@dnd-kit/core";
 import { Types } from "@/types/DndTypes";
 import { NewFormElement } from "@/types/FormCreator";
 import ElementDraggableWrapper from "@/components/app/ElementDraggableWrapper";
+import { useFormContext } from "react-hook-form";
 
 export default function FormCreatorArea() {
     const { formElements, addFormElement } = useFormCreator();
     const { setNodeRef, isOver } = useDroppable({
         id: Types.CREATOR_AREA,
     });
+    const { watch } = useFormContext();
+    const formValues = watch();
 
     useDndMonitor({
         onDragEnd: (event: DragEndEvent) => {
@@ -30,7 +33,10 @@ export default function FormCreatorArea() {
                 {formElements.map((formElement) => (
                     <ElementDraggableWrapper formElement={formElement} key={formElement.id}>
                         <ElementComponentOverlay id={formElement.id}>
-                            <ElementComponent type={formElement.type} />
+                            <ElementComponent 
+                                type={formElement.type} 
+                                attributes={formValues[formElement.id]} 
+                            />
                         </ElementComponentOverlay>
                     </ElementDraggableWrapper>
                 ))}
