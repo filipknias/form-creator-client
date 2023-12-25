@@ -20,7 +20,6 @@ export default function ElementComponentOverlay({ children, id }: Props) {
     });
     const dndContext = useDndContext();
 
-
     useDndMonitor({
         onDragEnd: (event: DragEndEvent) => {
             const droppableElementId = event.over?.id;
@@ -64,11 +63,12 @@ export default function ElementComponentOverlay({ children, id }: Props) {
                     break;
                 }
             }
+            setActiveElementId(null);
         },
     });
 
     return (
-        <div className="relative group cursor-pointer" onMouseUp={() => setActiveElementId(id)}>
+        <div className="relative group cursor-pointer" onClick={() => setActiveElementId(id)}>
             <div className="absolute top-0 h-1/2 w-full rounded-xl" ref={topDroppableHalf.setNodeRef}>
                 {topDroppableHalf.isOver && dndContext.active?.id !== id && (
                     <div className="h-2 bg-white rounded-t-xl"></div>
@@ -82,7 +82,7 @@ export default function ElementComponentOverlay({ children, id }: Props) {
             <div className="absolute inset-0 bg-black bg-opacity-70 hidden group-hover:flex items-center gap-4 justify-end z-50" data-component-id={id}>
                 <button 
                     className="bg-red-500 flex items-center justify-center w-16 h-full text-xl hover:bg-red-600 transition duration-200 rounded-r-md"
-                    onMouseUp={() => deleteFormElement(id)}
+                    onClick={() => deleteFormElement(id)}
                 >
                     <FaTrash />
                 </button>

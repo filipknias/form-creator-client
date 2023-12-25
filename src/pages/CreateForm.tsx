@@ -13,7 +13,7 @@ export default function CreateForm() {
                 <div className="flex flex-col h-screen">
                     <FormCreatorToolbar />
                     <div className="flex bg-slate-800 h-full">
-                        <div className="flex-1 py-16 px-8">
+                        <div className="flex-1 p-8">
                             <div className="h-full max-w-3xl mx-auto">
                                 <FormCreatorArea />
                             </div>
