@@ -8,13 +8,13 @@ export default function FormElementsSidebar() {
     const { activeFormElement } = useFormCreator();
 
     return (
-        <Card className="h-full">
-            <CardContent>
+        <Card className="h-full rounded-none border-none">
+            <CardContent className="h-full">
                 {activeFormElement ? (
                     <ElementForm formElement={activeFormElement} />
                 ) : (
                     <>
-                        <CardHeader>Drag and drop elements</CardHeader>
+                        <CardHeader className="px-0">Drag and drop elements</CardHeader>
                         <div className="flex flex-wrap gap-4">
                             {formElements.map((element) => (
                                 <FormElementTile key={element.type} formElement={element} />

@@ -28,14 +28,11 @@ export default function FormCreatorArea() {
         <Card className="h-full p-4 overflow-y-auto overflow-x-hidden" ref={setNodeRef}>
             <div className="flex flex-col gap-4">
                 {formElements.map((formElement) => (
-                    <div key={formElement.id}>
-                        <p>{formElement.indexPosition}</p>
-                        <ElementDraggableWrapper formElement={formElement}>
-                            <ElementComponentOverlay id={formElement.id}>
-                                <ElementComponent type={formElement.type} />
-                            </ElementComponentOverlay>
-                        </ElementDraggableWrapper>
-                    </div>
+                    <ElementDraggableWrapper formElement={formElement} key={formElement.id}>
+                        <ElementComponentOverlay id={formElement.id}>
+                            <ElementComponent type={formElement.type} />
+                        </ElementComponentOverlay>
+                    </ElementDraggableWrapper>
                 ))}
                 {isOver && (
                     <div className="rounded-xl bg-slate-800 w-full h-36"></div>

@@ -8,6 +8,7 @@ import { Label } from "../ui/label";
 import { useFormContext } from "react-hook-form";
 import { getKeyByValue } from "@/utilities/getKeyByValue";
 import { ElementAttributeValue } from "@/types/FormCreator";
+import { useEffect, useRef } from "react";
 
 interface Props {
     formElement: FormElement;
@@ -17,9 +18,22 @@ export default function ElementForm({ formElement }: Props) {
     const { setActiveElementId } = useFormCreator();
     const { attributes, id } = formElement;
     const { register } = useFormContext();
+    const sidebarRef = useRef<HTMLDivElement|null>(null);
+
+    useEffect(() => {
+        const clickOutsideFn = (e: MouseEvent) => {
+            const targetDataId = (e.target as HTMLElement).getAttribute("data-component-id");
+            if (sidebarRef.current && !sidebarRef.current.contains(e.target as Node) && !targetDataId) {
+                setActiveElementId(null);
+            }
+        };
+        
+        document.addEventListener("mousedown", (e) => clickOutsideFn(e));
+        return () => document.removeEventListener("mousedown", clickOutsideFn);
+    }, [setActiveElementId]);
 
     return (
-        <div className="py-8">
+        <div className="py-8 h-full" ref={sidebarRef}>
             <div className="flex items-center justify-between border-b border-slate-700 pb-2 mb-6">
                 <CardDescription>Element properties</CardDescription>
                 <IoCloseOutline 
