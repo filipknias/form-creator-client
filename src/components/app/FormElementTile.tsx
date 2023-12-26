@@ -34,7 +34,7 @@ export default function FormElementTile({ formElement }: Props) {
             {...listeners}
         >
             <div 
-                className={`rounded-md border border-slate-800 bg-slate-950 p-4 h-24 w-24 hover:border-slate-400 transition duration-200 ${isDragging ? "cursor-grab" : "cursor-grabbing"}`}
+                className={`rounded-md border border-slate-800 bg-slate-950 p-4 h-32 w-32 flex flex-col gap-2 items-center justify-center hover:border-slate-400 transition duration-200 ${isDragging ? "cursor-grab" : "cursor-grabbing"}`}
             >
                 <div className="flex justify-center mb-2 text-3xl"><IconElement /></div>
                 <p className="text-white text-sm font-medium text-center">{label}</p>
