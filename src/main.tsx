@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import CreateForm from '@/pages/CreateForm.tsx';
 import { ThemeProvider } from '@/context/ThemeContext.tsx';
-import ReduxProvider from '@/components/providers/ReduxProvider.tsx';
+import FormPreview from './pages/FormPreview.tsx';
 
 const router = createBrowserRouter([
     {
@@ -18,15 +18,17 @@ const router = createBrowserRouter([
     {
         path: "/create-form",
         element: <CreateForm />,
-      },
+    },
+    {
+        path: "/preview/test-id",
+        element: <FormPreview />,
+    },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark">
-        {/* <ReduxProvider> */}
-            <RouterProvider router={router} />
-        {/* </ReduxProvider> */}
+        <RouterProvider router={router} />
     </ThemeProvider>
   </React.StrictMode>,
 )
