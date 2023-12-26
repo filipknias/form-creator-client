@@ -10,7 +10,7 @@ export default function FormElementsSidebar() {
     const formSectionElements = formElements.filter(({ section }) => section === "form");
 
     return (
-        <Card className="h-full rounded-none border-none px-4 py-2">
+        <Card className="h-full rounded-none border-none p-2">
             <CardContent className="h-full">
                 {activeFormElement ? (
                     <ElementForm formElement={activeFormElement} />
