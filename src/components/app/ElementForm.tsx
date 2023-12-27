@@ -9,6 +9,9 @@ import { useFormContext } from "react-hook-form";
 import { getKeyByValue } from "@/utilities/getKeyByValue";
 import { ElementAttributeValue } from "@/types/FormCreator";
 import { useEffect, useRef } from "react";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { FaPlus } from "react-icons/fa";
 
 interface Props {
     formElement: FormElement;
@@ -17,7 +20,7 @@ interface Props {
 export default function ElementForm({ formElement }: Props) {
     const { setActiveElementId } = useFormCreator();
     const { attributes, id } = formElement;
-    const { register } = useFormContext();
+    const { register, setValue, getValues } = useFormContext();
     const sidebarRef = useRef<HTMLDivElement|null>(null);
 
     useEffect(() => {
@@ -31,6 +34,24 @@ export default function ElementForm({ formElement }: Props) {
         document.addEventListener("mousedown", (e) => clickOutsideFn(e));
         return () => document.removeEventListener("mousedown", clickOutsideFn);
     }, [setActiveElementId]);
+
+    const addSelectOption = () => {
+        const prevOptions: string[] = getValues(`${id}.options`);
+        const defaultValue = "New option";
+        setValue(`${id}.options`, [...prevOptions, defaultValue]);
+    };
+
+    const deleteSelectOption = (index: number) => {
+        const prevOptions: string[] = getValues(`${id}.options`);
+        const newOptions = prevOptions.filter((_, optionIdx) => optionIdx !== index);
+        setValue(`${id}.options`, newOptions);
+    };
+
+    const updateSelectValue = (value: string, index: number) => {
+        const prevOptions: string[] = getValues(`${id}.options`);
+        const newOptions = prevOptions.map((option, optionIdx) => optionIdx === index ? value : option);
+        setValue(`${id}.options`, newOptions);
+    };
 
     return (
         <div className="py-8 h-full" ref={sidebarRef}>
@@ -87,6 +108,57 @@ export default function ElementForm({ formElement }: Props) {
                             <br />
                             It will be displayed below the field.
                         </CardDescription>
+                    </div>
+                )}
+                {attributes && attributes.text && (
+                    <div>
+                        <CardTitle className="text-base mb-2">Text</CardTitle>
+                        <Textarea 
+                            className="w-full mb-2" 
+                            {...register(`${id}.${getKeyByValue<ElementAttributeValue>(attributes, attributes.text)}`)} 
+                        />
+                    </div>
+                )}
+                {attributes && attributes.height && (
+                    <div>
+                        <CardTitle className="text-base mb-2">Height (px)</CardTitle>
+                        <Input 
+                            type="number"
+                            className="w-full mb-2"
+                            {...register(`${id}.${getKeyByValue<ElementAttributeValue>(attributes, attributes.height)}`, { valueAsNumber: true })}
+                        />
+                    </div>
+                )}
+                {attributes && attributes.rows && (
+                    <div>
+                        <CardTitle className="text-base mb-2">Rows</CardTitle>
+                        <Input 
+                            type="number"
+                            className="w-full mb-2"
+                            {...register(`${id}.${getKeyByValue<ElementAttributeValue>(attributes, attributes.rows)}`, { valueAsNumber: true })}
+                        />
+                    </div>
+                )}
+                {attributes && attributes.options && (
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <CardTitle className="text-base mb-2">Options</CardTitle>
+                            <Button variant="outline" onClick={addSelectOption}>
+                                <FaPlus className="mr-2" />
+                                Add
+                            </Button>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            {getValues(`${id}.options`).map((optionValue: string, index: number) => (
+                                <div className="flex items-center gap-4" key={index}>
+                                    <Input 
+                                        value={optionValue} 
+                                        onChange={(e) => updateSelectValue(e.target.value, index)} 
+                                    />
+                                    <IoCloseOutline className="text-3xl cursor-pointer" onClick={() => deleteSelectOption(index)} />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
                 {attributes && Object.prototype.hasOwnProperty.call(attributes, "required") && (
